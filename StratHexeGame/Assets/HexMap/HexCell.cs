@@ -11,6 +11,14 @@ public class HexCell : MonoBehaviour {
     [SerializeField]
     HexCell[] neighbors;
 
+    public Vector3 Position
+    {
+        get
+        {
+            return transform.localPosition;
+        }
+    }
+
     public int Elevation
     {
         get
@@ -21,11 +29,13 @@ public class HexCell : MonoBehaviour {
         {
             elevation = value;
             Vector3 position = transform.localPosition;
-            position.y = value * HexMetric.elevationStep;
+            position.y +=
+                (HexMetrics.SampleNoise(position).y * 2f - 1f) *
+                HexMetrics.elevationPerturbStrength;
             transform.localPosition = position;
 
             Vector3 uiPosition = uiRect.localPosition;
-            uiPosition.z = elevation * -HexMetric.elevationStep;
+            uiPosition.z = -position.y;
             uiRect.localPosition = uiPosition;
         }
     }
@@ -45,13 +55,13 @@ public class HexCell : MonoBehaviour {
 
     public HexEdgeType GetEdgeType(HexDirection direction)
     {
-        return HexMetric.GetEdgeType(
+        return HexMetrics.GetEdgeType(
             elevation, neighbors[(int)direction].elevation
         );
     }
     public HexEdgeType GetEdgeType(HexCell otherCell)
     {
-        return HexMetric.GetEdgeType(
+        return HexMetrics.GetEdgeType(
             elevation, otherCell.elevation
         );
     }
